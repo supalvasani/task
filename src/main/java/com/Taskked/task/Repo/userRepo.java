@@ -15,6 +15,7 @@ public class userRepo {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     public List<User> findall(){
