@@ -43,22 +43,24 @@ public class UserController {
     public ResponseEntity<?> updateUserDetails(@RequestBody UserRequestDTO userRequestDTO, @PathVariable("id") String userid) {
         try {
             User user = userService.updateUserDetails(userRequestDTO, userid);
-            return new ResponseEntity<>(user, HttpStatus.CONTINUE);
+            return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (RuntimeException e) {
-            throw new RuntimeException("current password is incorrect");
+            System.err.println("Error updating user details: " + e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/getuser/{id}")
-    public ResponseEntity<?> getauserById(@PathVariable Long userid) {
+    public ResponseEntity<?> getauserById(@PathVariable("id") String userid) {
         try {
             User user = userService.getUserByID(userid);
             if (user == null) {
-                return new ResponseEntity<>(user, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User not found with ID: " + userid, HttpStatus.NOT_FOUND);
             }
+            return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            System.err.println("Error fetching user by ID: " + e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR); // General error for unexpected issues
         }
-        return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 }
