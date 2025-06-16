@@ -9,5 +9,5 @@ public class TaskRequestDTO {
     private String title;
     private boolean completed;
     private LocalDateTime dueDate;
-    private Long userId;
+    private String userId;
 }
