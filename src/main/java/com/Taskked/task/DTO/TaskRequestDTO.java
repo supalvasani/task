@@ -8,6 +8,5 @@ import java.time.LocalDateTime;
 public class TaskRequestDTO {
     private String title;
     private boolean completed;
-    private LocalDateTime dueDate;
     private String userId;
 }

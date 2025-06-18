@@ -10,5 +10,4 @@ public class TaskResponseDTO {
     private Long taskid;
     private String title;
     private boolean completed;
-    private LocalDateTime dueDate;
 }
