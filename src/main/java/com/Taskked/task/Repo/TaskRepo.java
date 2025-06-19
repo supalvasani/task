@@ -4,9 +4,14 @@ import com.Taskked.task.Model.Tasks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class TaskRepo {
@@ -18,15 +23,32 @@ public class TaskRepo {
         return jdbcTemplate.query(sql, new Object[]{userId}, new BeanPropertyRowMapper<>(Tasks.class));
     }
 
-    public int addTasks(Tasks tasks){
-        String sql = "INSERT INTO tasks (title, completed, user_id) VALUES (?,?,?)";
-        int rowsUpdated = jdbcTemplate.update(sql,tasks.getTitle(),tasks.isCompleted(),tasks.getUserId());
-        if(rowsUpdated>0){
-            return 1;
-        }else{
-            throw new RuntimeException("tasks not added");
+    public int addTasks(Tasks tasks) {
+        String sql = "INSERT INTO tasks (title, completed, user_id) VALUES (?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        int rowsInserted = jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, tasks.getTitle());
+            ps.setBoolean(2, tasks.isCompleted());
+            ps.setString(3, tasks.getUserId());
+            return ps;
+        }, keyHolder);
+
+        if (rowsInserted > 0) {
+            Map<String, Object> keys = keyHolder.getKeys();
+            if (keys != null && keys.containsKey("taskid")) {
+                Number key = (Number) keys.get("taskid");
+                tasks.setTaskid(key.longValue());
+                return Math.toIntExact(key.longValue());
+            } else {
+                throw new RuntimeException("Failed to retrieve task ID");
+            }
+        } else {
+            throw new RuntimeException("Task not added");
         }
     }
+
 
     public int updateTask(Tasks tasks){
         String sql = "UPDATE tasks SET title = ? WHERE taskid = ?";
@@ -67,6 +89,12 @@ public class TaskRepo {
         String sql = "SELECT taskid, title FROM tasks WHERE user_id = ? AND completed = TRUE ORDER BY taskid ASC";
         return jdbcTemplate.query(sql, new Object[]{userId}, new BeanPropertyRowMapper<>(Tasks.class));
     }
+
+    public Tasks getTaskById(long taskid) {
+        String sql = "SELECT * FROM tasks WHERE taskid = ?";
+        return jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(Tasks.class), taskid);
+    }
+
 
 }
 

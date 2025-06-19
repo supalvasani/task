@@ -7,8 +7,6 @@ import com.Taskked.task.Exception.TaskNotFoundException;
 import com.Taskked.task.Model.Tasks;
 import com.Taskked.task.Repo.TaskRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,32 +37,69 @@ public class TaskService {
     }
 
     public Tasks updateTask(TaskResponseDTO taskResponseDTO) {
-        Tasks task = new Tasks();
         if (taskResponseDTO.getTitle() == null || taskResponseDTO.getTitle().trim().isEmpty()) {
             throw new InvalidTaskException("Title can't be empty");
         }
         if (taskResponseDTO.getTaskid() == 0) {
             throw new InvalidTaskException("Task ID is missing");
         }
+
+        Tasks task = new Tasks();
         task.setTitle(taskResponseDTO.getTitle());
         task.setCompleted(taskResponseDTO.isCompleted());
+        task.setTaskid(taskResponseDTO.getTaskid());
+
         int updated = taskRepo.updateTask(task);
         if (updated <= 0) {
             throw new InvalidTaskException("Task update failed");
         }
-        return task;
-    }
-
-    public HttpStatusCode deleteTask(TaskResponseDTO taskResponseDTO, HttpStatus httpStatus) {
-    }
-
-    public HttpStatusCode completeTask(TaskResponseDTO taskResponseDTO, HttpStatus httpStatus) {
+        return taskRepo.getTaskById(task.getTaskid());
     }
 
 
-    public Object completeTask(String userid) {
+
+
+    public Tasks deleteTask(long taskId) {
+        if (taskId == 0) {
+            throw new InvalidTaskException("Task ID is missing");
+        }
+        int deleted = taskRepo.deleteTask(taskId);
+        if (deleted <= 0) {
+            throw new TaskNotFoundException("task is not found");
+        }
+        return new Tasks();
+    }
+
+
+    public Tasks completeTask(long taskId) {
+        if (taskId == 0) {
+            throw new InvalidTaskException("Task ID is missing");
+        }
+        int updated = taskRepo.completeTask(taskId);
+        if (updated <= 0) {
+            throw new TaskNotFoundException("Task not found or not updated");
+        }
+        Tasks updatedTask = taskRepo.getTaskById(taskId);
+        if (updatedTask == null) {
+            throw new TaskNotFoundException("Task not found after update");
+        }
+        return updatedTask;
+    }
+
+
+    public List<Tasks> completeTask(String userid) {
+        List<Tasks> tasks = taskRepo.completedtask(userid);
+        if(tasks.isEmpty()){
+            throw new TaskNotFoundException("No complete tasks for user: " + userid);
+        }
+        return tasks;
     }
 
     public Object incompleteTask(String userid) {
+        List<Tasks> tasks = taskRepo.incompletetask(userid);
+        if(tasks.isEmpty()){
+            throw new TaskNotFoundException("No incomplete tasks for user: " + userid);
+        }
+        return tasks;
     }
 }

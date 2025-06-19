@@ -11,6 +11,6 @@ public class Mapper {
     }
 
     public static TaskResponseDTO toTaskDTO(Tasks tasks){
-        return new TaskResponseDTO(tasks.getTaskid(),tasks.getTitle(),tasks.isCompleted(),tasks.getDueDate());
+        return new TaskResponseDTO(tasks.getTaskid(),tasks.getTitle(),tasks.isCompleted());
     }
 }

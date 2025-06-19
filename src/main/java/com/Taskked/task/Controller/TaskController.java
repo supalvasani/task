@@ -28,24 +28,28 @@ public class TaskController {
     }
 
     @PutMapping("/tasks/{id}")
-    public ResponseEntity<?> UpdateTasks(@RequestBody TaskResponseDTO taskResponseDTO){
+    public ResponseEntity<?> UpdateTasks(@RequestBody TaskResponseDTO taskResponseDTO,@PathVariable("id") int taskId){
         Tasks task = taskService.updateTask(taskResponseDTO);
         return new ResponseEntity<>(task,HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/tasks/{id}")
-    public ResponseEntity<?> deleteTask(@RequestBody TaskResponseDTO taskResponseDTO){
-        return new ResponseEntity<>(taskService.deleteTask(taskResponseDTO,HttpStatus.ACCEPTED));
+    public ResponseEntity<?> deleteTask(@PathVariable("id") long taskId) {
+        Tasks task = taskService.deleteTask(taskId);
+        return new ResponseEntity<>(task, HttpStatus.ACCEPTED);
     }
 
+
     @PutMapping("/tasks/{id}/complete")
-    public ResponseEntity<?> completedTask(@RequestBody TaskResponseDTO taskResponseDTO){
-        return new ResponseEntity<>(taskService.completeTask(taskResponseDTO,HttpStatus.ACCEPTED));
+    public ResponseEntity<?> completedTask(@PathVariable("id") long taskId){
+        Tasks tasks = taskService.completeTask(taskId);
+        return new ResponseEntity<>(tasks,HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/users/{id}/tasks/completed")
     public ResponseEntity<?> completedTasks(@PathVariable("id") String userid){
-        return new ResponseEntity<>(taskService.completeTask(userid),HttpStatus.ACCEPTED);
+        List<Tasks> task = taskService.completeTask(userid);
+        return new ResponseEntity<>(task,HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/users/{id}/tasks/incomplete")
