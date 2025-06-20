@@ -1,5 +1,6 @@
 package com.Taskked.task.Repo;
 
+import com.Taskked.task.DTO.TaskResponseDTO;
 import com.Taskked.task.Model.Tasks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -30,7 +31,7 @@ public class TaskRepo {
         int rowsInserted = jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, tasks.getTitle());
-            ps.setBoolean(2, tasks.isCompleted());
+            ps.setBoolean(2, false);
             ps.setString(3, tasks.getUserId());
             return ps;
         }, keyHolder);

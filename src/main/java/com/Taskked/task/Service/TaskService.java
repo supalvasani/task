@@ -16,18 +16,25 @@ public class TaskService {
 
     @Autowired
     private TaskRepo taskRepo;
-    public List<Tasks> getAllTask(String userid) {
+    public List<TaskResponseDTO> getAllTask(String userid) {
         List<Tasks> taskList = taskRepo.alltaskd(userid);
         if (taskList.isEmpty()) {
             throw new TaskNotFoundException("No tasks found for user: " + userid);
         }
-        return taskList;
+        return taskList.stream()
+                .map(task -> new TaskResponseDTO(
+                        task.getTaskid(),
+                        task.getTitle(),
+                        task.isCompleted()
+                ))
+                .toList();
+
     }
 
     public Object createTask(TaskRequestDTO taskRequestDTO) {
         Tasks task = new Tasks();
         task.setTitle(taskRequestDTO.getTitle());
-        task.setCompleted(taskRequestDTO.isCompleted());
+//        task.setCompleted(false);
         task.setUserId(taskRequestDTO.getUserId());
         int saved = taskRepo.addTasks(task);
         if (saved <= 0) {
@@ -44,25 +51,22 @@ public class TaskService {
             throw new InvalidTaskException("Task ID is missing");
         }
 
-        Tasks task = new Tasks();
-        task.setTitle(taskResponseDTO.getTitle());
-        task.setCompleted(taskResponseDTO.isCompleted());
-        task.setTaskid(taskResponseDTO.getTaskid());
-
-        int updated = taskRepo.updateTask(task);
-        if (updated <= 0) {
-            throw new InvalidTaskException("Task update failed");
+        try {
+            Tasks task = taskRepo.getTaskById(taskResponseDTO.getTaskid());
+            task.setTitle(taskResponseDTO.getTitle());
+            task.setCompleted(taskResponseDTO.isCompleted());
+            taskRepo.updateTask(task);
+            return task;
+        } catch (Exception e) {
+            throw new RuntimeException("task not updated");
         }
-        return taskRepo.getTaskById(task.getTaskid());
     }
-
-
-
 
     public Tasks deleteTask(long taskId) {
         if (taskId == 0) {
             throw new InvalidTaskException("Task ID is missing");
         }
+        Tasks task = taskRepo.getTaskById(taskId);
         int deleted = taskRepo.deleteTask(taskId);
         if (deleted <= 0) {
             throw new TaskNotFoundException("task is not found");
@@ -72,34 +76,45 @@ public class TaskService {
 
 
     public Tasks completeTask(long taskId) {
-        if (taskId == 0) {
-            throw new InvalidTaskException("Task ID is missing");
+        Tasks task = taskRepo.getTaskById(taskId);
+        if (task == null) {
+            throw new RuntimeException("Task not found with ID: " + taskId);
         }
-        int updated = taskRepo.completeTask(taskId);
-        if (updated <= 0) {
-            throw new TaskNotFoundException("Task not found or not updated");
+
+        if (!task.isCompleted()) {
+            taskRepo.completeTask(taskId);
+            task.setCompleted(true);
         }
-        Tasks updatedTask = taskRepo.getTaskById(taskId);
-        if (updatedTask == null) {
-            throw new TaskNotFoundException("Task not found after update");
-        }
-        return updatedTask;
+
+        return task;
     }
 
 
-    public List<Tasks> completeTask(String userid) {
+    public List<TaskResponseDTO> completeTask(String userid) {
         List<Tasks> tasks = taskRepo.completedtask(userid);
         if(tasks.isEmpty()){
             throw new TaskNotFoundException("No complete tasks for user: " + userid);
         }
-        return tasks;
+        return tasks.stream()
+                .map(task -> new TaskResponseDTO(
+                        task.getTaskid(),
+                        task.getTitle(),
+                        task.isCompleted()
+                ))
+                .toList();
     }
 
-    public Object incompleteTask(String userid) {
+    public List<TaskResponseDTO> incompleteTask(String userid) {
         List<Tasks> tasks = taskRepo.incompletetask(userid);
         if(tasks.isEmpty()){
             throw new TaskNotFoundException("No incomplete tasks for user: " + userid);
         }
-        return tasks;
+        return tasks.stream()
+                .map(task -> new TaskResponseDTO(
+                        task.getTaskid(),
+                        task.getTitle(),
+                        task.isCompleted()
+                ))
+                .toList();
     }
 }
