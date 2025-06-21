@@ -149,7 +149,3 @@ Made with by [Supal Vasani](https://github.com/supalvasani)
 > Feel free to fork, clone, or submit a PR!
 
 ---
-
-## 🌟 Share & Tag Us
-
-Share your journey on Twitter, LinkedIn, or Instagram and tag **@Keploy** to get featured and win goodies!
