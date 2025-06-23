@@ -26,6 +26,16 @@ This server allows users to:
 
 ---
 
+### Testing Stack
+
+- **JUnit 5**: Core testing framework  
+- **Mockito**: For creating mock objects and verifying interactions  
+- **Spring Boot Test**: For integration and API testing (`@WebMvcTest`, `@JdbcTest`)  
+- **H2 Database**: In-memory database for fast and isolated integration tests  
+- **JaCoCo**: For generating code coverage reports  
+
+---
+
 ## 📊 APIs Created
 
 ### 🔐 Auth APIs
@@ -97,6 +107,30 @@ spring.datasource.password=your_password
 Server runs on: `http://localhost:8080`
 
 ---
+
+## ✅ Testing
+
+This project includes a comprehensive test suite across unit, integration, and API levels.
+
+### 🧪 Unit Tests (Service Layer)
+
+- **Focus**: Service method logic  
+- **Tools**: JUnit 5 + Mockito  
+- **Strategy**: Mock repository dependencies  
+- **Goal**: >70% coverage for business logic  
+
+### 🗄️ Integration Tests (Repository Layer)
+
+- **Focus**: Real DB operations using H2  
+- **Tools**: Spring Boot `@JdbcTest`  
+- **Strategy**: Use H2 to simulate PostgreSQL for accurate behavior  
+
+### 🌐 API Tests (Controller Layer)
+
+- **Focus**: Endpoint behavior  
+- **Tools**: Spring Boot `@WebMvcTest`, MockMvc  
+- **Strategy**: Mock Service layer to isolate controller logic  
+
 
 ## 🔮 Swagger / API Documentation
 
